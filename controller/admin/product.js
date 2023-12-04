@@ -6,9 +6,9 @@ const addProduct = async (req, res, next) => {
   console.log("req.body ========================>", req.body);
   console.log("req.file ========================>", req.file);
 
-  const product = await ProductModel.findOne({ name: req.body.name });
-  console.log("product =========>", product?.id);
   try {
+    const product = await ProductModel.findOne({ name: req.body.name });
+    console.log("product =========>", product?.id);
     if (product?.id) {
       res.json({ status: 200, message: "Product is already there !" });
     } else {
@@ -46,10 +46,9 @@ const productList = async (req, res) => {
 
     const allProducts = await ProductModel.find(search).populate("category");
 
-
     console.log("allProducts =============================>", allProducts);
     // console.log("data =============================>", data);
-    res.json({ status: 200, data:allProducts });
+    res.json({ status: 200, data: allProducts });
   } catch (error) {
     res.json({ status: 400, message: error.message });
   }
