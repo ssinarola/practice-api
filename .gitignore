@@ -1,0 +1,7 @@
+/node_modules
+/.env
+/public
+/task
+/Spotifyapp.js
+/testServer.js
+/spotify.js
