@@ -1,79 +1,69 @@
-const CategoryModel = require("../../model/CategoryModel");
+const Category = require("../../model/Category");
 
 // Add Category
 const addCategory = async (req, res) => {
   try {
-    const category = await CategoryModel.findOne({ name: req.body.name });
-    console.log("category =========>", category?.id);
-    if (category?.id) {
-      res.json({ status: 200, message: "Category is already there !" });
-    } else {
-      await CategoryModel.create({
-        name: req.body.name,
-        description: req.body?.description,
-      });
-      res.json({ status: 200, message: "Added new category !" });
+    const category = await Category.findOne({ name: req.body.name });
+    console.log("category =========>", category);
+    if (category) {
+      res.status(200).json({ message: "Category is already there !" });
     }
+    await Category.create({
+      name: req.body.name,
+      description: req.body?.description,
+    });
+    res.status(200).json({ message: "Added new category !" });
   } catch (error) {
     console.log("error addCategory =========================>", error.message);
-    res.json({ status: 400, message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
 // Category listing
 const categoryList = async (req, res) => {
   try {
-    const allCategory = await CategoryModel.find();
+    const allCategory = await Category.find();
     console.log("allCategory =============================>", allCategory);
-    res.json({ status: 200, data: allCategory });
+    res.status(200).json({ data: allCategory });
   } catch (error) {
-    res.json({ status: 400, message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
 // Delete Category
 const deleteCategory = async (req, res) => {
-  console.log("req.params ======================>", req.params, req.query);
   try {
-    const category = await CategoryModel.findById(req.params.id);
+    const category = await Category.findById(req.params.id);
     console.log("category ============>", category);
 
     if (category) {
-      const deletedCategory = await CategoryModel.deleteOne({
+      const deletedCategory = await Category.deleteOne({
         _id: req.params.id,
       });
       console.log("deletedCategory", deletedCategory);
-      res.json({
-        status: 200,
-        message: "Deleted category successfully!",
-        data: { ...deletedCategory },
-      });
-    } else {
-      res.json({
-        status: 400,
-        message: "No category is available !",
-      });
+      res.status(200).json({ message: "Deleted category successfully!" });
     }
+    res.status(400).json({
+      message: "No category is available !",
+    });
   } catch (error) {
-    res.json({ status: 400, message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
 // Update Category
 const updateCategory = async (req, res) => {
   try {
-    console.log("req.body ====>", req.body);
-
     const updateObject = {
       name: req.body.name,
       description: req.body.description,
     };
-    await CategoryModel.findByIdAndUpdate(req.body.id, updateObject);
+    await Category.findByIdAndUpdate(req.body.id, updateObject);
 
-    res.json({ status: 200, message: "Updated category Successfully !" });
+    res.status(200).json({ message: "Updated category Successfully !" });
   } catch (error) {
     console.log("error updateCategory ==============>", error);
-    res.json({ status: 400, message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 

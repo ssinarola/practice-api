@@ -1,58 +1,61 @@
 const express = require("express");
-const UserModal = require("../model/UserModel");
+const User = require("../model/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const createError = require("http-errors");
 
 const router = express.Router();
-router.post("/signup", async (req, res) => {
-  console.log("req ==========>", req)
-  // check db if user is available => find query
-  const user = await UserModal.findOne({ email: req.body.email });
+router.post("/signup", async (req, res, next) => {
+  try {
+    // check db if user is available => find query
+    const userFilter = { email: req.body.email };
+    const user = await User.findOne(userFilter);
 
-  if (user?.id) {
-    // send msg that User is already register
-    res.json({ status: 200, message: "User is already Registered !" });
-  } else {
+    if (user) next(createError(400, "User is already Registered"));
+
     // bcrypt PASSWORD
-    let hasPassword;
-    try {
-      hasPassword = await bcrypt.hash(req.body.password.toString(), 10);
-    } catch (err) {
-      console.log("err.message", err.message);
-    }
-    console.log("hasPassword", hasPassword);
+    const hasPassword = bcrypt.hashSync(req.body.password.toString(), 10);
 
-    // Add user - Create doc in user
-    await UserModal.create({
+    const newUser = new User({
       fullName: req.body.fullName,
       email: req.body.email,
       password: hasPassword,
     });
-    res.json({ status: 200, message: "User registered Successfully !" });
+    // here we can access _id, with create method we can access but it is awating for creation
+    await newUser.save();
+
+    res.status(201).json({ message: "User registered Successfully !" });
+  } catch (error) {
+    console.log(
+      "error.message Signup =================>",
+      error,
+      "<<<<<<<<<<<<<-------------------->>>>>>>>>>>>",
+      JSON.stringify(error)
+    );
+    next(createError(400, error.message));
   }
 });
 
 router.post("/signin", async (req, res) => {
-  const { email, password } = req.body;
-  //validation - if balnk
+  try {
+    const { email, password } = req.body;
 
-  if (!email || !password) {
-    res.status(400).send("Email or Password should not be blank");
-  }
-  // find user and check id and pass if both match then create token and return token
-  const user = await UserModal.findOne({ email });
-  console.log("user ========>", user);
+    // find user and pass if both match then create token and return token
+    const user = await User.findOne({ email });
+    console.log("user ========>", user);
 
-  if (user && (await bcrypt.compare(password, user?.password))) {
-    // token creation
-    const token = jwt.sign({ email }, process.env.JWT_SECRET_KEY, {
-      // expiresIn: "1h",
-      expiresIn: "4h",
-    });
-    console.log("token ===>", token);
-    res.json({ status: 200, data: { message: "Logged in", token } });
-  } else {
-    res.json({ status: 400, message: "User is not registered !" });
+    if (user && (await bcrypt.compare(password, user?.password))) {
+      // token creation
+      const token = jwt.sign({ email }, process.env.JWT_SECRET_KEY, {
+        // expiresIn: "1h",
+        expiresIn: "4h",
+      });
+      console.log("token ===>", token);
+      res.status(200).json({ data: { message: "Logged in", token } });
+    }
+    res.status(400).json({ message: "User is not registered !" });
+  } catch (error) {
+    next(error);
   }
 });
 

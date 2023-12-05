@@ -10,23 +10,28 @@ const app = express();
 app.use(express.json());
 
 // express.urlencoded() is a method inbuilt in express to recognize the incoming Request Object as strings or arrays.
-app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: true }));
 
 app.use(cors());
 
 // for parsing multipart/form-data
-// app.use(upload.single()); 
+// app.use(upload.single());
 
-
-// access from borwesr for static folder "public" files 
+// access from borwesr for static folder "public" files
 // eg http://localhost:5000/uploads/1701420504554-camera.jpg try to access this from browser it will not allow but once add static path with public it will allow.
-app.use(express.static("public"))
-
+app.use(express.static("public"));
 
 app.use("/api", mainRoute);
 
-app.get("/", (req, res) => {
-  res.send("Welcome to Server");
+// Global Errors handling -
+app.use((err, req, res, next) => {
+  console.log(
+    "err app =================================>",
+    err,
+    "--------------------------------->>>>>>>>>",
+    JSON.stringify(err)
+  );
+  res.status(err.status || 500).json({ message: err.message });
 });
 
 app.listen(process.env.PORT, () => {

@@ -1,4 +1,4 @@
-const ProductModel = require("../../model/ProductModel");
+const Product = require("../../model/Product");
 
 // Add product
 const addProduct = async (req, res, next) => {
@@ -7,24 +7,23 @@ const addProduct = async (req, res, next) => {
   console.log("req.file ========================>", req.file);
 
   try {
-    const product = await ProductModel.findOne({ name: req.body.name });
-    console.log("product =========>", product?.id);
-    if (product?.id) {
-      res.json({ status: 200, message: "Product is already there !" });
-    } else {
-      await ProductModel.create({
-        name: req.body.name,
-        category: req.body.category,
-        price: req.body?.price,
-        quantity: req.body?.quantity,
-        description: req.body?.description,
-        image: `uploads/${req.file?.filename}`,
-      });
-      res.json({ status: 200, message: "Added new product !" });
+    const product = await Product.findOne({ name: req.body.name });
+
+    if (product) {
+      res.status(200).json({ message: "Product is already there !" });
     }
+    await Product.create({
+      name: req.body.name,
+      category: req.body.category,
+      price: req.body?.price,
+      quantity: req.body?.quantity,
+      description: req.body?.description,
+      image: `uploads/${req.file?.filename}`,
+    });
+    res.status(200).json({ message: "Added new product !" });
   } catch (error) {
     console.log("error addProduct =========================>", error.message);
-    res.json({ status: 400, message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
@@ -44,13 +43,13 @@ const productList = async (req, res) => {
 
     console.log("search ========>", search);
 
-    const allProducts = await ProductModel.find(search).populate("category");
+    const allProducts = await Product.find(search).populate("category");
 
     console.log("allProducts =============================>", allProducts);
     // console.log("data =============================>", data);
-    res.json({ status: 200, data: allProducts });
+    res.status(200).json({ data: allProducts });
   } catch (error) {
-    res.json({ status: 400, message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
@@ -58,23 +57,21 @@ const productList = async (req, res) => {
 const deleteProduct = async (req, res) => {
   console.log("req.params ======================>", req.params.id);
   try {
-    const product = await ProductModel.findById(req.params.id);
+    const product = await Product.findById(req.params.id);
     console.log("product ============>", product);
 
     if (product) {
-      const deletedProduct = await ProductModel.deleteOne({
+      const deletedProduct = await Product.deleteOne({
         _id: req.params.id,
       });
       console.log("deletedProduct", deletedProduct);
-      res.json({ status: 200, message: "Deleted Product successfully!" });
-    } else {
-      res.json({
-        status: 400,
-        message: "No product is available with this Id.",
-      });
+      res.status(200).json({ message: "Deleted Product successfully!" });
     }
+    res.status(400).json({
+      message: "No product is available with this Id.",
+    });
   } catch (error) {
-    res.json({ status: 400, message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
@@ -91,14 +88,14 @@ const updateProduct = async (req, res) => {
       image: req.file?.filename,
     };
     console.log("updateObject ===>", updateObject);
-    const updatedProduct = await ProductModel.findByIdAndUpdate(
+    const updatedProduct = await Product.findByIdAndUpdate(
       req.query.id,
       updateObject
     );
     console.log("updatedProduct ====>", updatedProduct);
-    res.json({ status: 200, message: "Product Updated Successfully !" });
+    res.status(200).json({ message: "Product Updated Successfully !" });
   } catch (error) {
-    res.json({ status: 400, message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
