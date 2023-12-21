@@ -9,12 +9,18 @@ const {
   updateProduct,
 } = require("../../controller/admin/product");
 const upload = require("../../middleware/fileUpload");
+const { productValidationRule } = require("../../utils/validationRules");
 
 router.use(isAuth);
 // note - upload.single("image")/upload.array("image") => here "image" name should be same with key when we pass image
-router.post("/add", upload.single("image"), addProduct);
+router.post("/add", productValidationRule, upload.single("image"), addProduct);
 router.get("/list", productList);
 router.delete("/delete/:id", deleteProduct);
-router.put("/update", upload.single("image"), updateProduct);
+router.put(
+  "/update",
+  productValidationRule,
+  upload.single("image"),
+  updateProduct
+);
 
 module.exports = router;

@@ -1,15 +1,7 @@
-const express = require("express");
+const router = require('express').Router()
 
-const authRoute = require("./authRoute");
-const productRoute = require("./admin/productRoute");
-const categoryRoute = require("./admin/categoryRoute");
+router.use('/auth', require('./authRoute'))
+router.use('/product', require('./admin/productRoute'))
+router.use('/category', require('./admin/categoryRoute'))
 
-const router = express.Router();
-
-router.use("/auth", authRoute);
-router.use("/product", productRoute);
-router.use("/category", categoryRoute)
-
-module.exports = router;
-
-
+module.exports = router
